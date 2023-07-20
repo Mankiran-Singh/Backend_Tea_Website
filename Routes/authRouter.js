@@ -4,6 +4,7 @@ const router=express.Router();
 
 router.route('/signUp').post(authController.signup);
 router.route('/login').post(authController.login)
-
+router.route('/forgotPassword').post(authController.forgotPassword);
+router.route('/resetPassword/:token').patch(authController.resetPassword)
 //router.route('/products').get(authController.protect)
 module.exports=router;
