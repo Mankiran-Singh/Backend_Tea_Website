@@ -1,0 +1,35 @@
+{
+  "name": "backend_malika",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "SET NODE_ENV=development& nodemon server.js",
+    "start_prod": "SET NODE_ENV=production& nodemon server.js"
+  },
+  "author": "Mankiran",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "google-auth-library": "^8.9.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.3.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.5.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "passport-microsoft": "^1.0.0",
+    "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
