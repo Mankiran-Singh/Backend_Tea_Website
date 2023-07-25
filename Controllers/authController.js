@@ -4,7 +4,7 @@ const jwt=require('jsonwebtoken');
 const CustomError = require('./../utils/customError');
 const sendEmail=require('./../utils/email');
 const crypto=require('crypto');
-
+const util=require('./../utils/customError')
 const signToken=id=>{
    return jwt.sign({id},process.env.SECRET_STR,{
       expiresIn:process.env.LOGIN_EXPIRES
@@ -115,11 +115,36 @@ exports.resetPassword=asyncErrorHandler(async(req,res,next)=>{
        }
     })
 })
-// exports.protect=asyncErrorHandler(async(req,res,next)=>{
-//    //1. Read the token & check if it exists
-//    //2. Validate the token
-//    //3. if the user exists
-//    //4. if the user changed the password after the token was issued
-//    //5. Allow user to access route
-//    next();
-// })
+
+exports.protect=asyncErrorHandler(async(req,res,next)=>{
+   //1. Read the token and check if exists
+      const testToken=req.header.authorization
+      let token; 
+      if(testToken && testToken.startsWith('bearer')){
+         token=testToken.split(' ')[1];          
+      }
+      if(!token){
+         next(new CustomError('You are logged in',401));
+      }
+      console.log(token);
+      //2. Validate the token
+      const decodedToken=await util.promisify(jwt.verify)(token,process.env.SECRET_STR);
+      console.log(decodedToken);
+
+   //3. If the user exists   
+      const user=await User.findById(decodedToken.id);
+      if(!user){
+         const error=new CustomError('The user with the given token does not exist',401);
+         next(error);
+      }
+   //4. If the user changed password after the token was issued
+    const isPasswordChanged=await user.isPasswordChanged(decodedToken.jwt);  
+   if(isPasswordChanged){
+        const error=new CustomError('The password has been recently changed.Please login again',401);
+        return next();
+     }
+   //5. Allow the user to access route
+   req.user=user;
+   
+   next();
+})

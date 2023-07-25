@@ -1,14 +1,15 @@
 const express=require('express');
 const morgan=require('morgan');
-const cors=require('cors')
+const cors=require('cors');
 const cookieSession=require('cookie-session')
 const passportSetup=require('./passport')
 const authRouter=require('./Routes/authRouter');
 const socialLoginRouter=require('./Routes/socialLoginRouter')
 const productsRouter=require('./Routes/productsRouter');
+const reviewsRouter=require('./Routes/reviewsRouter');
 const CustomError = require('./utils/customError');
 const globalErrorHandler=require('./Controllers/errorController')
-const  passport  =  require('passport');
+const  passport = require('passport');
 const expressSession=require('express-session');
 
 let app=express();
@@ -59,6 +60,8 @@ app.use('/auth',socialLoginRouter)
 app.use('/user',authRouter);
 
 app.use('/products',productsRouter);
+
+app.use('/reviews',reviewsRouter);
 
 app.all('*',(req,res,next)=>{
         const err=new CustomError(`can't find ${req.originalUrl} on the server!`,404)

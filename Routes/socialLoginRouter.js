@@ -69,7 +69,8 @@
 //   });
 
 // module.exports=router;
+
 const router=require("express").Router();
 const socialLoginController=require('./../Controllers/socialLoginController');
-router.route('/googleLogin').post(socialLoginController.googleLogin)
+router.route('/googleLogin').post(socialLoginController.googleLogin);
 module.exports=router

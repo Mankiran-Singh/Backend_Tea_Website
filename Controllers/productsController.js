@@ -79,33 +79,6 @@ exports.postProducts=asyncErrorHandler(async (req,res,next)=>{
    })
  })
 
- exports.updateReview=asyncErrorHandler(async (req,res,next)=>{
-    console.log(req.params);
-    console.log(req.body);
-    const productUpdated=await Products.updateMany
-        ({
-            _id: req.params.id
-           },
-           {
-            $set: {
-                     "reviews.$[x]":req.body
-              }
-            },
-           {
-            arrayFilters: [
-             {
-                'x._id':req.params._id
-             }
-            ]
-           })
-    console.log(productUpdated)
-    res.status(200).json({
-        status:'success',
-        data:{
-            product:productUpdated
-        }
-    })
-})
 
 exports.getProductById=asyncErrorHandler(async(req,res,next)=>{
     const product=await Products.findById(req.params.id);
