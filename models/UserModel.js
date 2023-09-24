@@ -8,9 +8,9 @@ const userSchema=new mongoose.Schema({
     type:String,
     required:[true,"Please enter name"]
   },
-  isAdmin:{
-     type:Boolean
-  },
+//   isAdmin:{
+//      type:Boolean
+//   },
   email:{
      type:String,
      required:[true,"Please enter an email"],
@@ -35,8 +35,11 @@ const userSchema=new mongoose.Schema({
         message:`Password & ConfirmPassword does'nt match!`
     }
   },
-  photo:{
-    type:String
+  photo:String,
+  role:{
+     type:String,
+     enum:['user','admin'],
+     default:'user'
   },
   passwordChangedAt:Date,
   passwordResetToken:String,
@@ -57,7 +60,7 @@ userSchema.methods.comparePasswordInDB=async function(password,passwordDB){
    return await bcrypt.compare(password,passwordDB)
 }
 
-userSchema.methods.passwordChanged=(JWTTimestamp)=>{
+userSchema.methods.isPasswordChanged=(JWTTimestamp)=>{
    if(this.passwordChangedAt){
        const passwordChangedTimestamp=parseInt(this.passwordChangedAt.getTime()/1000);
        console.log(this.passwordChangedAt,JWTTimestamp)
@@ -67,10 +70,14 @@ userSchema.methods.passwordChanged=(JWTTimestamp)=>{
 }
 
 userSchema.methods.createResetPasswordToken=function(){
-    const resetToken=crypto.randomBytes(32).toString('hex');
+   
+   const resetToken=crypto.randomBytes(32).toString('hex');
+   
     this.passwordResetToken=crypto.createHash('sha256').update(resetToken).digest('hex');
-    this.passwordResetTokenExpires=Date.now()+10*60*1000;
+    this.passwordResetTokenExpires=Date.now() + 10 * 60 * 1000;
+    
     return resetToken; 
 }
+
 const User=mongoose.model('User',userSchema)
 module.exports=User;

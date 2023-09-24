@@ -4,7 +4,8 @@ const jwt=require('jsonwebtoken');
 const CustomError = require('./../utils/customError');
 const sendEmail=require('./../utils/email');
 const crypto=require('crypto');
-const util=require('./../utils/customError')
+const util=require('util');
+
 const signToken=id=>{
    return jwt.sign({id},process.env.SECRET_STR,{
       expiresIn:process.env.LOGIN_EXPIRES
@@ -50,15 +51,15 @@ exports.login=asyncErrorHandler(async(req,res,next)=>{
        data:{
           token,
           name:user.name,
-          isAdmin:user.isAdmin,
-          photo:user.photo
+         //  isAdmin:user.isAdmin,
+         //  photo:user.photo
        }
     })
 })
 
 exports.forgotPassword=asyncErrorHandler(async(req,res,next)=>{
    //1. GET USER BASED ON POSTED EMAIL
-   const user=User.findOne({email:req.body.email});
+   const user=await User.findOne({email:req.body.email});
    if(!user){
       const error=new CustomError("We can't find user with given email",404)
       next(error);
@@ -69,8 +70,9 @@ exports.forgotPassword=asyncErrorHandler(async(req,res,next)=>{
    await user.save({validateBeforeSave:false});
    
    //3. SEND THE TOKEN BACK TO USER EMAIL
-   const resetUrl=`${req.protocol}://${req.get('host')}/user/resetPassword/${resetToken}`
+   const resetUrl=`${req.protocol}://localhost:4200/user/resetPassword/${resetToken}`;
    const message=`We have received password reset request. Please click on the below link to reset your password\n\n${resetUrl}\n\n This reset password link will be available for 10 minutes`;
+   console.log(message)
    try{
       await sendEmail({
          email:user.email,
@@ -79,9 +81,11 @@ exports.forgotPassword=asyncErrorHandler(async(req,res,next)=>{
      });  
      res.status(200).json({
        status:'success',
-       message:'password reset email link sent to your email'
+       message:'password reset email link sent to your email',
+       token:resetToken
      })
    }catch(err){
+      console.log(err)
       user.passwordResetToken=undefined,
       user.passwordResetTokenExpires=undefined,
       user.save({validateBeforeSave:false})
@@ -91,7 +95,12 @@ exports.forgotPassword=asyncErrorHandler(async(req,res,next)=>{
 
 exports.resetPassword=asyncErrorHandler(async(req,res,next)=>{
    const token=crypto.createHash('sha256').update(req.params.token).digest('hex')
-   const user=await User.findOne({passwordResetToken:token,passwordResetTokenExpires:{$gt:Date.now()}})
+   // console.log('token', token)
+   const user=await User.findOne({
+      passwordResetToken:token,
+      passwordResetTokenExpires:{$gt:Date.now()}
+   })
+   // console.log('user', user)
     if(!user){
       const error=new CustomError("Token is invalid or has expired",404)
       next(error);
@@ -100,7 +109,7 @@ exports.resetPassword=asyncErrorHandler(async(req,res,next)=>{
     user.confirmPassword=req.body.confirmPassword;
     user.passwordResetToken=undefined;
     user.passwordResetTokenExpires=undefined;
-    //user.passwordChangedAt=Date.now();
+    user.passwordChangedAt=Date.now();
 
     user.save();
     //Login the user once his password has changed
@@ -110,26 +119,23 @@ exports.resetPassword=asyncErrorHandler(async(req,res,next)=>{
        data:{
           loginToken,
           name:user.name,
-          isAdmin:user.isAdmin,
-          photo:user.photo
+         //  photo:user.photo
        }
     })
 })
 
 exports.protect=asyncErrorHandler(async(req,res,next)=>{
    //1. Read the token and check if exists
-      const testToken=req.header.authorization
+      const testToken=req.headers.authorization
       let token; 
-      if(testToken && testToken.startsWith('bearer')){
+      if(testToken && testToken.startsWith('Bearer')){
          token=testToken.split(' ')[1];          
       }
       if(!token){
-         next(new CustomError('You are logged in',401));
+         next(new CustomError('You are not logged in',401));
       }
-      console.log(token);
       //2. Validate the token
       const decodedToken=await util.promisify(jwt.verify)(token,process.env.SECRET_STR);
-      console.log(decodedToken);
 
    //3. If the user exists   
       const user=await User.findById(decodedToken.id);
@@ -138,7 +144,7 @@ exports.protect=asyncErrorHandler(async(req,res,next)=>{
          next(error);
       }
    //4. If the user changed password after the token was issued
-    const isPasswordChanged=await user.isPasswordChanged(decodedToken.jwt);  
+    const isPasswordChanged=await user.isPasswordChanged(decodedToken.iat);  
    if(isPasswordChanged){
         const error=new CustomError('The password has been recently changed.Please login again',401);
         return next();
@@ -148,3 +154,25 @@ exports.protect=asyncErrorHandler(async(req,res,next)=>{
    
    next();
 })
+
+//wrapper function()
+exports.restrict=(role)=>{
+   return(req,res,next)=>{
+      if(req.user.role!==role){
+         const error = new CustomError('You do not have permission to perform this action');
+         next(error); 
+      }
+      next();
+   }
+}
+
+//In case you want to remove or pose restriction for multiple users
+// exports.restrict=(...role)=>{
+//    return(req,res,next)=>{
+//       if(!role.includes(req.user.role)){
+//          const error=new CustomError('You do not have permission to perform this action');
+//          next(error); 
+//       }
+//       next();
+//    }
+// }

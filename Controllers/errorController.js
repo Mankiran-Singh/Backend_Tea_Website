@@ -31,14 +31,14 @@ const castErrorHandler=(err)=>{
 }
 
 const duplicateKeyErrorHandler=(err)=>{
-   const msg=`there is already a movie with name ${err.keyValue.name}.Please use another name`  
+   const msg=`there is already a product with name ${err.keyValue.name}.Please use another name`  
    return new CustomError(msg,400);
 }
 
 const ValidationErrorHandler=(err)=>{
    const errors=Object.values(err.errors).map(val=>val.message);
    const errorMessages=errors.join('. ');
-   const msg=`Invlaid input data ${errorMessages}`
+   const msg=`Invalid input data ${errorMessages}`
    return new CustomError(msg,400);
 }
 const handleExpiredJWT=(err)=>{

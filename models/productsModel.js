@@ -43,18 +43,5 @@ const productsSchema=new mongoose.Schema({
       ]
 })
 
-
-// productsSchema.post('save',async function(next){
-//     //first hash() will salt the password(add random string to it) and then hash it
-//     sum=0;
-//     for(let i in this.reviews){
-//         if(this.reviews[i].isApproved){
-//            sum+=this.reviews[i].isApproved
-//         }
-//     }
-//     this.isApproved=sum;
-//     next();//cost=12=how cpu intensive this operation will be
-// })
-
 const products=mongoose.model('products',productsSchema)
 module.exports=products;

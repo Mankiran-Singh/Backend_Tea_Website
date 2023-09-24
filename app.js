@@ -61,7 +61,7 @@ app.use('/user',authRouter);
 
 app.use('/products',productsRouter);
 
-app.use('/reviews',reviewsRouter);
+app.use('/products',reviewsRouter);
 
 app.all('*',(req,res,next)=>{
         const err=new CustomError(`can't find ${req.originalUrl} on the server!`,404)

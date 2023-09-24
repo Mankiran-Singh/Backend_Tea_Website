@@ -30,7 +30,7 @@ exports.googleLogin=asyncErrorHandler(async(req,res,next)=>{
                          token,
                          firstName:newUser.name,
                          user:{_id, name, email},
-                         isAdmin:false
+                        //  isAdmin:false
                        }
                     })
             }else{
@@ -40,7 +40,7 @@ exports.googleLogin=asyncErrorHandler(async(req,res,next)=>{
                  data:{
                    token,
                    name:existingUser.name,
-                   isAdmin:existingUser.isAdmin,
+                  //  isAdmin:existingUser.isAdmin,
                    photo:existingUser.photo
                  }
            })

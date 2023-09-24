@@ -17,7 +17,7 @@ exports.postProducts=asyncErrorHandler(async (req,res,next)=>{
 
  exports.getProducts=asyncErrorHandler(async(req,res,next)=>{
     let page = req.query.page*1 || 1;
-    let limit = req.query.limit*1 || 2;
+    let limit = req.query.limit*1 || 3;
     let skip = (page -1) * limit;
 
     let product=await Products.aggregate([
@@ -83,7 +83,7 @@ exports.postProducts=asyncErrorHandler(async (req,res,next)=>{
 exports.getProductById=asyncErrorHandler(async(req,res,next)=>{
     const product=await Products.findById(req.params.id);
     if(!product){
-        const err=new CustomError("Product with the error not found",404)
+        const err=new CustomError(`Product with the given ${req.params.id} error not found`,404)
         return next(err);
       }
 
@@ -92,5 +92,17 @@ exports.getProductById=asyncErrorHandler(async(req,res,next)=>{
         data:{
             product
         }
+    })
+})
+
+exports.deleteProduct=asyncErrorHandler(async(req,res,next)=>{
+    const product=await Products.findByIdAndDelete(req.params.id);
+    if(!product){
+        const err=new CustomError(`Product with the given id : ${req.params.id}`,404)
+        return next(err);
+    }
+    res.status(204).json({
+        status:'success',
+        data:null
     })
 })
