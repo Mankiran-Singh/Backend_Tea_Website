@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    image: backend-image
+    container_name: backend
+    ports:
+      - "3000:3000"
+    # Add other configurations as needed (environment variables, volumes, etc.)
+
+  # frontend:
+  #   image: frontend-image
+  #   container_name: frontend
+  #   ports:
+  #     - "80:80"
+    # Add other configurations as needed
